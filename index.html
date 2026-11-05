@@ -169,18 +169,6 @@
         window.onload = function () {
             const { jsPDF } = window.jspdf;
 
-            function calculerJoursOuvres(year, month) {
-                let joursOuvres = 0;
-                const joursDansMois = new Date(year, month + 1, 0).getDate();
-                for (let day = 1; day <= joursDansMois; day++) {
-                    const date = new Date(year, month, day);
-                    if (date.getDay() !== 0 && date.getDay() !== 6) {
-                        joursOuvres++;
-                    }
-                }
-                return joursOuvres;
-            }
-
             function validateInputs() {
                 const requiredFields = [
                     "nomEntreprise","adresseEntreprise","siret","codeNaf","telEntreprise",
@@ -235,7 +223,7 @@
                 const salaireBrutHSup = heuresSup * tauxHoraireMajoré;
                 const salaireBrutTotal = salaireBrutProrata + salaireBrutHSup;
 
-                // Cotisations 2026 (CSG/CRDS corrigées)
+                // Cotisations 2026 corrigées
                 const c = calculerCotisations(salaireBrutTotal);
                 const totalSalarial = c.totalSalarial;
                 const totalPatronal = c.totalPatronal;
@@ -387,47 +375,49 @@
     </script>
 
 <script>
-// ===== PARAMÈTRES 2026 =====
-const PMSS = 4005; // plafond mensuel de la Sécurité sociale 2026
+// ===== PARAMÈTRES 2026 (vérifiés) =====
+const PMSS = 4005; // plafond mensuel SS 2026 [citation:2][citation:9]
 
 const TAUX = {
     salarie: {
-        vieillessePlafonnee: 0.069,
-        vieillesseDeplafonnee: 0.004,
-        agircT1: 0.0315,
-        cegT1: 0.0086,
-        agircT2: 0.0864,
-        cegT2: 0.0108,
-        cet: 0.0014,
-        csgDeductible: 0.068,     // CSG déductible 6,8 %
-        csgNonDeductible: 0.024,  // CSG non déductible 2,4 %
-        crds: 0.005               // CRDS 0,5 %
-        // Maladie salariale : 0 % (hors Alsace-Moselle). Chômage salarial : 0 %.
+        vieillessePlafonnee: 0.069,     // 6,90 % [citation:3][citation:9]
+        vieillesseDeplafonnee: 0.004,   // 0,40 % [citation:3][citation:9]
+        agircT1: 0.0315,                // 3,15 % [citation:4][citation:9]
+        cegT1: 0.0086,                  // 0,86 % [citation:9]
+        agircT2: 0.0864,                // 8,64 % [citation:4][citation:9]
+        cegT2: 0.0108,                  // 1,08 % [citation:9]
+        cet: 0.0014,                    // 0,14 %
+        csgDeductible: 0.068,           // 6,8 % (sur 98,25 % du brut) [citation:9]
+        csgNonDeductible: 0.024,        // 2,4 % (sur 98,25 %) [citation:9][citation:15]
+        crds: 0.005                     // 0,5 % (sur 98,25 %) [citation:9][citation:15]
     },
     patronal: {
-        maladie: 0.13,
-        famille: 0.0525,
-        vieillessePlafonnee: 0.0855,
-        vieillesseDeplafonnee: 0.0211,
-        agircT1: 0.0472,
-        cegT1: 0.0129,
-        agircT2: 0.1295,
-        cegT2: 0.0162,
-        cet: 0.0021,
-        chomage: 0.04,
-        ags: 0.0025,
-        fnal: 0.001, // FNAL 0,10 % (< 50 salariés)
-        formation: 0.01,
-        apprentissage: 0.0068,
-        mobilite: 0.01 // versement mobilité : taux LOCAL, à adapter à la commune
+        maladie: 0.13,                  // 13 % (taux plein) [citation:3][citation:9]
+        famille: 0.0525,                // 5,25 % [citation:3][citation:9]
+        vieillessePlafonnee: 0.0855,    // 8,55 % [citation:3][citation:9]
+        vieillesseDeplafonnee: 0.0211,  // 2,11 % [citation:3][citation:9]
+        agircT1: 0.0472,                // 4,72 % [citation:4][citation:9]
+        cegT1: 0.0129,                  // 1,29 % [citation:9]
+        agircT2: 0.1295,                // 12,95 % [citation:4][citation:9]
+        cegT2: 0.0162,                  // 1,62 % [citation:9]
+        cet: 0.0021,                    // 0,21 %
+        chomage: 0.04,                  // 4 % (plafond 16 020 €/mois) [citation:3][citation:9]
+        ags: 0.0025,                    // 0,25 % (plafond 16 020 €/mois) [citation:9]
+        fnal: 0.001,                    // 0,10 % (< 50 salariés) [citation:3][citation:9]
+        formation: 0.01,                // 1 % (11 salariés et +)
+        apprentissage: 0.0068,          // 0,68 %
+        mobilite: 0.01                  // taux local indicatif
     }
 };
 
 const IR = {
     abattementMin: 509,
     abattementMax: 14555,
-    plafondDemiPart: 1807,
-    decote: { seul: { base: 897, seuil: 1982 }, couple: { base: 1483, seuil: 3277 }, taux: 0.4525 }
+    plafondDemiPart: 1807,              // plafonnement QF 2025 [citation:6][citation:11]
+    decote: {
+        seul:   { base: 897,  seuil: 1982, taux: 0.4525 }, // [citation:6]
+        couple: { base: 1483, seuil: 3277, taux: 0.4525 }  // [citation:6]
+    }
 };
 
 const DEFAULT_TRANCHES = [
@@ -440,27 +430,29 @@ const DEFAULT_TRANCHES = [
 let TRANCHES_IMPOT = DEFAULT_TRANCHES;
 
 // ===== COTISATIONS =====
-function ligne(label, base, taux) { return { label, base, taux, montant: base * taux }; }
+function ligne(label, base, taux, deductible = true) {
+    return { label, base, taux, montant: base * taux, deductible };
+}
 
 function calculerCotisations(B) {
     const tA = Math.min(B, PMSS);                          // tranche 1 / plafonnée
     const t2 = Math.min(Math.max(B - PMSS, 0), 7 * PMSS);  // tranche 2 (1 à 8 PMSS)
-    const p4 = Math.min(B, 4 * PMSS);                      // assiette chômage / AGS
+    const p4 = Math.min(B, 4 * PMSS);                      // assiette chômage / AGS (16 020 €)
     const hp = B > PMSS ? B : 0;                           // assiette CET
-    const csg = B - 0.0175 * p4;                           // assiette CSG/CRDS : 98,25 % du brut
+    const csg = B - 0.0175 * p4;                           // assiette CSG/CRDS = 98,25 % [citation:9]
     const s = TAUX.salarie, p = TAUX.patronal;
 
     const sal = [
-        ligne('Assurance vieillesse plafonnée', tA, s.vieillessePlafonnee),
-        ligne('Assurance vieillesse déplafonnée', B, s.vieillesseDeplafonnee),
-        ligne('Retraite complémentaire tranche 1', tA, s.agircT1),
-        ligne('CEG tranche 1', tA, s.cegT1),
-        ligne('Retraite complémentaire tranche 2', t2, s.agircT2),
-        ligne('CEG tranche 2', t2, s.cegT2),
-        ligne('CET', hp, s.cet),
-        ligne('CSG déductible', csg, s.csgDeductible),
-        ligne('CSG non déductible', csg, s.csgNonDeductible),
-        ligne('CRDS', csg, s.crds)
+        ligne('Assurance vieillesse plafonnée', tA, s.vieillessePlafonnee, true),
+        ligne('Assurance vieillesse déplafonnée', B, s.vieillesseDeplafonnee, true),
+        ligne('Retraite complémentaire tranche 1', tA, s.agircT1, true),
+        ligne('CEG tranche 1', tA, s.cegT1, true),
+        ligne('Retraite complémentaire tranche 2', t2, s.agircT2, true),
+        ligne('CEG tranche 2', t2, s.cegT2, true),
+        ligne('CET', hp, s.cet, true),
+        ligne('CSG déductible', csg, s.csgDeductible, true),
+        ligne('CSG non déductible', csg, s.csgNonDeductible, false),
+        ligne('CRDS', csg, s.crds, false)
     ];
     const pat = [
         ligne('Maladie - maternité - invalidité - décès', B, p.maladie),
@@ -480,12 +472,18 @@ function calculerCotisations(B) {
         ligne('Versement mobilité', B, p.mobilite)
     ];
     const somme = L => L.reduce((t, l) => t + l.montant, 0);
-    const totalSalarial = somme(sal), totalPatronal = somme(pat);
-    const netSocial = B - totalSalarial; // net avant impôt
-    // Net imposable = net social + CSG non déductible + CRDS
-    const csgNonDed = sal.find(l => l.label === 'CSG non déductible').montant;
-    const crds = sal.find(l => l.label === 'CRDS').montant;
-    const netImposable = netSocial + csgNonDed + crds;
+    const totalSalarial = somme(sal);
+    const totalPatronal = somme(pat);
+
+    // Net social = brut - toutes cotisations salariales
+    const netSocial = B - totalSalarial;
+
+    // Net imposable = brut - cotisations salariales DÉDUCTIBLES uniquement
+    const totalSalarialDeductible = sal
+        .filter(l => l.deductible)
+        .reduce((t, l) => t + l.montant, 0);
+    const netImposable = B - totalSalarialDeductible;
+
     return { sal, pat, totalSalarial, totalPatronal, netSocial, netImposable };
 }
 
@@ -495,7 +493,6 @@ const lignePat = L => L.filter(l => l.montant > 0.005).map(l => [l.label, l.base
 
 // ===== IMPÔT SUR LE REVENU =====
 function nbPartsFiscales(couple, enfants) {
-    // 0,5 part pour chacun des 2 premiers enfants, 1 part à partir du 3e
     return (couple ? 2 : 1) + Math.min(enfants, 2) * 0.5 + Math.max(enfants - 2, 0);
 }
 
@@ -513,7 +510,7 @@ function calculerImpotAnnuel(netImposableAnnuel, nbParts, couple) {
     const revenu = Math.max(netImposableAnnuel - abat, 0);
     const partsBase = couple ? 2 : 1;
     let impotBrut = impotBareme(revenu / nbParts) * nbParts;
-    if (nbParts > partsBase) { // plafonnement du quotient familial
+    if (nbParts > partsBase) {
         const impotSansEnfants = impotBareme(revenu / partsBase) * partsBase;
         impotBrut = Math.max(impotBrut, impotSansEnfants - (nbParts - partsBase) * 2 * IR.plafondDemiPart);
     }
@@ -539,11 +536,12 @@ function calculerTauxImpot() {
 
     document.getElementById('tauxImpot').value = taux.toFixed(2);
     document.getElementById('helpImpot').innerHTML = `Barème 2026 — net imposable annuel ${netImposableAnnuel.toFixed(2)} € (${nbParts} part${nbParts > 1 ? 's' : ''}) — impôt brut ${r.impotBrut.toFixed(2)} €, décote ${r.decote.toFixed(2)} €, impôt estimé ${r.impotNet.toFixed(2)} €`;
-    const net = c.netSocial - (c.netImposable * taux) / 100;
-    document.getElementById('apercuNetAPayer').textContent = `Net à payer : ${net.toFixed(2)} €`;
+
+    const impotMensuel = (c.netImposable * taux) / 100;
+    const netAPayer = c.netSocial - impotMensuel;
+    document.getElementById('apercuNetAPayer').textContent = `Net à payer : ${netAPayer.toFixed(2)} €`;
 }
 
-// Chargement optionnel du JSON externe (si absent ou ouvert en file://, le barème intégré ci-dessus est utilisé)
 fetch('tranches_impot_2026.json')
     .then(r => r.json())
     .then(d => { TRANCHES_IMPOT = d; calculerTauxImpot(); })
