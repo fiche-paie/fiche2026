@@ -185,6 +185,16 @@
                 return true;
             }
 
+            function splitAdresse(adresse) {
+                if (!adresse) return ["", ""];
+                const trimmed = adresse.trim();
+                const m = trimmed.match(/^(.*?)[,;]?\s*(\d{5}\s+[^,;]+)$/);
+                if (m && m[1].trim()) {
+                    return [m[1].trim().replace(/[,;]\s*$/, ""), m[2].trim()];
+                }
+                return [trimmed, ""];
+            }
+
             window.genererPDF = function () {
                 if (!validateInputs()) return;
 
@@ -214,6 +224,9 @@
                 const tauxImpot = parseFloat(document.getElementById("tauxImpot").value) || 0;
                 const couleurTheme = document.getElementById("couleurTheme").value;
 
+                const [adresseEntrepriseVoie, adresseEntrepriseCP] = splitAdresse(adresseEntreprise);
+                const [adresseSalarieVoie, adresseSalarieCP] = splitAdresse(adresseSalarie);
+
                 const anciennete = calculerAnciennete(dateEntree, dateFin);
                 const [jourDebut, mois, annee] = dateDebut.split("/").map(Number);
                 const joursDansLeMois = new Date(annee, mois, 0).getDate();
@@ -223,7 +236,6 @@
                 const salaireBrutHSup = heuresSup * tauxHoraireMajoré;
                 const salaireBrutTotal = salaireBrutProrata + salaireBrutHSup;
 
-                // Cotisations 2026 corrigées
                 const c = calculerCotisations(salaireBrutTotal);
                 const totalSalarial = c.totalSalarial;
                 const totalPatronal = c.totalPatronal;
@@ -234,53 +246,76 @@
                 const doc = new jsPDF();
                 const rgbColor = hexToRgb(couleurTheme);
 
-                const marginX = 10, marginY = 10;
+                const marginX = 8;
+                const marginY = 8;
                 const pageWidth = 210 - 2 * marginX;
                 const pageHeight = 297 - 2 * marginY;
                 doc.setDrawColor(rgbColor.r, rgbColor.g, rgbColor.b);
                 doc.setLineWidth(0.25);
-                doc.roundedRect(marginX, marginY, pageWidth, pageHeight, 5, 5);
+                doc.roundedRect(marginX, marginY, pageWidth, pageHeight, 4, 4);
 
-                doc.setFontSize(14);
+                // ===== TITRE REMONTÉ =====
+                doc.setFontSize(13);
                 doc.setTextColor(0, 0, 0);
-                doc.text("BULLETIN DE SALAIRE", 105, 19, { align: 'center' });
+                doc.text("BULLETIN DE SALAIRE", 105, 14, { align: 'center' });
 
+                // ===== BLOC ENTREPRISE (remonté) =====
                 const infosEntreprise = [
-                    nomEntreprise, adresseEntreprise, `SIRET : ${siret}`, `Code NAF : ${codeNaf}`,
-                    `Tel : ${telEntreprise}`, `Fax : ${faxEntreprise}`, `Email : ${emailEntreprise}`
+                    nomEntreprise,
+                    adresseEntrepriseVoie,
+                    ...(adresseEntrepriseCP ? [adresseEntrepriseCP] : []),
+                    `SIRET : ${siret}`,
+                    `Code NAF : ${codeNaf}`,
+                    `Tel : ${telEntreprise}`,
+                    `Fax : ${faxEntreprise}`,
+                    `Email : ${emailEntreprise}`
                 ];
-                const yEntrepriseStart = 23, yEntrepriseHeight = 35;
+                const yEntrepriseStart = 17;
+                const yEntrepriseHeight = 34;
                 doc.setFillColor(rgbColor.r, rgbColor.g, rgbColor.b);
-                doc.roundedRect(15, yEntrepriseStart, 80, yEntrepriseHeight, 3, 3, "F");
-                let yPositionEntreprise = yEntrepriseStart + (yEntrepriseHeight / 3) - ((infosEntreprise.length * 2) / 3);
+                doc.roundedRect(11, yEntrepriseStart, 88, yEntrepriseHeight, 3, 3, "F");
+                let yPositionEntreprise = yEntrepriseStart + 5.5;
                 infosEntreprise.forEach((line) => {
-                    doc.setFontSize(9); doc.setTextColor(0, 0, 0);
-                    doc.text(line, 20, yPositionEntreprise, { align: 'left' });
-                    yPositionEntreprise += 4;
+                    doc.setFontSize(9);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(line, 14, yPositionEntreprise, { align: 'left' });
+                    yPositionEntreprise += 3.5;
                 });
 
+                // ===== BLOC SALARIÉ (remonté) =====
                 const infosSalarie = [
-                    nomSalarie, adresseSalarie, `N° DE SECURITE SOCIAL : ${secuSalarie}`,
-                    `Date d'entrée : ${dateEntree} (${anciennete.ans} ans ${anciennete.mois} mois)`,
-                    `Poste Occupé : ${posteOccupe}`, `Tel : ${telSalarie}`, `Email : ${emailSalarie}`
+                    nomSalarie,
+                    adresseSalarieVoie,
+                    ...(adresseSalarieCP ? [adresseSalarieCP] : []),
+                    `N° SECU : ${secuSalarie}`,
+                    `Entrée : ${dateEntree} (${anciennete.ans} ans ${anciennete.mois} mois)`,
+                    `Poste : ${posteOccupe}`,
+                    `Tel : ${telSalarie}`,
+                    `Email : ${emailSalarie}`
                 ];
-                const ySalarieStart = 23, ySalarieHeight = 35;
+                const ySalarieStart = 17;
+                const ySalarieHeight = 34;
                 doc.setFillColor(rgbColor.r, rgbColor.g, rgbColor.b);
-                doc.roundedRect(115, ySalarieStart, 80, ySalarieHeight, 3, 3, "F");
-                let yPositionSalarie = ySalarieStart + (ySalarieHeight / 3) - ((infosSalarie.length * 2) / 3);
+                doc.roundedRect(111, ySalarieStart, 88, ySalarieHeight, 3, 3, "F");
+                let yPositionSalarie = ySalarieStart + 5.5;
                 infosSalarie.forEach((line) => {
-                    doc.setFontSize(9); doc.setTextColor(0, 0, 0);
-                    doc.text(line, 120, yPositionSalarie, { align: 'left' });
-                    yPositionSalarie += 4;
+                    doc.setFontSize(9);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(line, 114, yPositionSalarie, { align: 'left' });
+                    yPositionSalarie += 3.5;
                 });
 
-                doc.setFont(undefined, 'bold'); doc.setFontSize(10);
+                // ===== PÉRIODE (remontée) =====
+                doc.setFont(undefined, 'bold');
+                doc.setFontSize(10);
                 doc.setTextColor(rgbColor.r, rgbColor.g, rgbColor.b);
-                doc.text("PERIODE :", 105, yPositionEntreprise + 10, { align: 'center' });
-                doc.setFontSize(9); doc.setTextColor(0, 0, 0);
-                doc.text(`${dateDebut} au ${dateFin}`, 105, yPositionEntreprise + 15, { align: 'center' });
+                doc.text("PERIODE :", 105, yEntrepriseStart + yEntrepriseHeight + 5, { align: 'center' });
+                doc.setFontSize(9);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`${dateDebut} au ${dateFin}`, 105, yEntrepriseStart + yEntrepriseHeight + 10, { align: 'center' });
                 doc.setFont(undefined, 'normal');
 
+                // ===== TABLEAU (démarre plus haut) =====
                 const lignesPaie = [
                     ["SALAIRE BRUT MENSUEL", "", "", salaireBrutMensuel.toFixed(2), "", ""],
                     ["SALAIRE BRUT PRORATA", "", "", salaireBrutProrata.toFixed(2), "", ""],
@@ -299,22 +334,35 @@
                     ["NET À PAYER EN EUROS", "", "", netAPayer.toFixed(2), "", ""]
                 ];
 
-                const columnWidths = [60, 15, 15, 25, 25, 30];
+                const columnWidths = [58, 15, 15, 24, 24, 29];
                 const totalTableWidth = columnWidths.reduce((a, b) => a + b, 0);
                 const startX = (210 - totalTableWidth) / 2;
-                const tableStartY = yPositionEntreprise + 25;
+                const tableStartY = yEntrepriseStart + yEntrepriseHeight + 13;
 
                 doc.setDrawColor(rgbColor.r, rgbColor.g, rgbColor.b);
                 doc.setFillColor(rgbColor.r, rgbColor.g, rgbColor.b);
-                doc.roundedRect(startX, tableStartY, totalTableWidth, 9, 2, 2, "FD");
+                doc.roundedRect(startX, tableStartY, totalTableWidth, 8, 2, 2, "FD");
 
                 doc.autoTable({
-                    startY: tableStartY + 7,
+                    startY: tableStartY + 6,
                     head: [["ÉLÉMENTS DE PAIE", "BASE", "TAUX", "À DÉDUIRE", "À PAYER", "CHARGES PATRONALES"]],
                     body: lignesPaie,
-                    margin: { left: startX },
-                    styles: { fontSize: 7, cellPadding: 1.42, overflow: 'linebreak', minCellHeight: 4.3, halign: 'left', textColor: [0,0,0] },
-                    headStyles: { fillColor: [rgbColor.r, rgbColor.g, rgbColor.b], textColor: [0,0,0], fontSize: 7, cellPadding: 2.2, halign: 'center' },
+                    margin: { left: startX, right: startX, bottom: 10 },
+                    styles: {
+                        fontSize: 7,
+                        cellPadding: 1.6,
+                        overflow: 'linebreak',
+                        minCellHeight: 4.6,
+                        halign: 'left',
+                        textColor: [0, 0, 0]
+                    },
+                    headStyles: {
+                        fillColor: [rgbColor.r, rgbColor.g, rgbColor.b],
+                        textColor: [0, 0, 0],
+                        fontSize: 7,
+                        cellPadding: 2.2,
+                        halign: 'center'
+                    },
                     columnStyles: {
                         0: { cellWidth: columnWidths[0], fontStyle: 'bold', halign: 'left' },
                         1: { cellWidth: columnWidths[1], halign: 'center' },
@@ -376,48 +424,45 @@
 
 <script>
 // ===== PARAMÈTRES 2026 (vérifiés) =====
-const PMSS = 4005; // plafond mensuel SS 2026 [citation:2][citation:9]
+const PMSS = 4005;
 
 const TAUX = {
     salarie: {
-        vieillessePlafonnee: 0.069,     // 6,90 % [citation:3][citation:9]
-        vieillesseDeplafonnee: 0.004,   // 0,40 % [citation:3][citation:9]
-        agircT1: 0.0315,                // 3,15 % [citation:4][citation:9]
-        cegT1: 0.0086,                  // 0,86 % [citation:9]
-        agircT2: 0.0864,                // 8,64 % [citation:4][citation:9]
-        cegT2: 0.0108,                  // 1,08 % [citation:9]
-        cet: 0.0014,                    // 0,14 %
-        csgDeductible: 0.068,           // 6,8 % (sur 98,25 % du brut) [citation:9]
-        csgNonDeductible: 0.024,        // 2,4 % (sur 98,25 %) [citation:9][citation:15]
-        crds: 0.005                     // 0,5 % (sur 98,25 %) [citation:9][citation:15]
+        vieillessePlafonnee: 0.069,
+        vieillesseDeplafonnee: 0.004,
+        agircT1: 0.0315,
+        cegT1: 0.0086,
+        agircT2: 0.0864,
+        cegT2: 0.0108,
+        cet: 0.0014,
+        csgDeductible: 0.068,
+        csgNonDeductible: 0.024,
+        crds: 0.005
     },
     patronal: {
-        maladie: 0.13,                  // 13 % (taux plein) [citation:3][citation:9]
-        famille: 0.0525,                // 5,25 % [citation:3][citation:9]
-        vieillessePlafonnee: 0.0855,    // 8,55 % [citation:3][citation:9]
-        vieillesseDeplafonnee: 0.0211,  // 2,11 % [citation:3][citation:9]
-        agircT1: 0.0472,                // 4,72 % [citation:4][citation:9]
-        cegT1: 0.0129,                  // 1,29 % [citation:9]
-        agircT2: 0.1295,                // 12,95 % [citation:4][citation:9]
-        cegT2: 0.0162,                  // 1,62 % [citation:9]
-        cet: 0.0021,                    // 0,21 %
-        chomage: 0.04,                  // 4 % (plafond 16 020 €/mois) [citation:3][citation:9]
-        ags: 0.0025,                    // 0,25 % (plafond 16 020 €/mois) [citation:9]
-        fnal: 0.001,                    // 0,10 % (< 50 salariés) [citation:3][citation:9]
-        formation: 0.01,                // 1 % (11 salariés et +)
-        apprentissage: 0.0068,          // 0,68 %
-        mobilite: 0.01                  // taux local indicatif
+        maladie: 0.13,
+        famille: 0.0525,
+        vieillessePlafonnee: 0.0855,
+        vieillesseDeplafonnee: 0.0211,
+        agircT1: 0.0472,
+        cegT1: 0.0129,
+        agircT2: 0.1295,
+        cegT2: 0.0162,
+        cet: 0.0021,
+        chomage: 0.04,
+        ags: 0.0025,
+        fnal: 0.001,
+        formation: 0.01,
+        apprentissage: 0.0068,
+        mobilite: 0.01
     }
 };
 
 const IR = {
     abattementMin: 509,
     abattementMax: 14555,
-    plafondDemiPart: 1807,              // plafonnement QF 2025 [citation:6][citation:11]
-    decote: {
-        seul:   { base: 897,  seuil: 1982, taux: 0.4525 }, // [citation:6]
-        couple: { base: 1483, seuil: 3277, taux: 0.4525 }  // [citation:6]
-    }
+    plafondDemiPart: 1807,
+    decote: { seul: { base: 897, seuil: 1982 }, couple: { base: 1483, seuil: 3277 }, taux: 0.4525 }
 };
 
 const DEFAULT_TRANCHES = [
@@ -435,11 +480,11 @@ function ligne(label, base, taux, deductible = true) {
 }
 
 function calculerCotisations(B) {
-    const tA = Math.min(B, PMSS);                          // tranche 1 / plafonnée
-    const t2 = Math.min(Math.max(B - PMSS, 0), 7 * PMSS);  // tranche 2 (1 à 8 PMSS)
-    const p4 = Math.min(B, 4 * PMSS);                      // assiette chômage / AGS (16 020 €)
-    const hp = B > PMSS ? B : 0;                           // assiette CET
-    const csg = B - 0.0175 * p4;                           // assiette CSG/CRDS = 98,25 % [citation:9]
+    const tA = Math.min(B, PMSS);
+    const t2 = Math.min(Math.max(B - PMSS, 0), 7 * PMSS);
+    const p4 = Math.min(B, 4 * PMSS);
+    const hp = B > PMSS ? B : 0;
+    const csg = B - 0.0175 * p4;
     const s = TAUX.salarie, p = TAUX.patronal;
 
     const sal = [
@@ -474,16 +519,9 @@ function calculerCotisations(B) {
     const somme = L => L.reduce((t, l) => t + l.montant, 0);
     const totalSalarial = somme(sal);
     const totalPatronal = somme(pat);
-
-    // Net social = brut - toutes cotisations salariales
     const netSocial = B - totalSalarial;
-
-    // Net imposable = brut - cotisations salariales DÉDUCTIBLES uniquement
-    const totalSalarialDeductible = sal
-        .filter(l => l.deductible)
-        .reduce((t, l) => t + l.montant, 0);
+    const totalSalarialDeductible = sal.filter(l => l.deductible).reduce((t, l) => t + l.montant, 0);
     const netImposable = B - totalSalarialDeductible;
-
     return { sal, pat, totalSalarial, totalPatronal, netSocial, netImposable };
 }
 
