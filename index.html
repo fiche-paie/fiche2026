@@ -3,94 +3,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Générateur de Fiche de Paie SMIC 2026</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            color: #333;
-            background-color: #f9f9f9;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        label {
-            display: block;
-            margin: 10px 0 5px;
-            font-weight: bold;
-            color: #2a4365;
-        }
-        .required:after {
-            content: " *";
-            color: #e53e3e;
-        }
-        input, select {
-            width: 80%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #cbd5e0;
-            border-radius: 4px;
-            background-color: #fff;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: #4299e1;
-            box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.3);
-        }
-        button {
-            padding: 12px 15px;
-            background: #2b6cb0;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 20px;
-            display: block;
-            width: 70%;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background: #2c5282;
-        }
-        h2 {
-            color: #2b6cb0;
-            margin-top: 30px;
-            border-bottom: 2px solid #bee3f8;
-            padding-bottom: 5px;
-        }
-        .color-picker {
-            display: flex;
-            align-items: center;
-            margin: 15px 0;
-        }
-        .color-picker label {
-            margin-right: 10px;
-            width: auto;
-        }
-        .color-picker input {
-            width: 50px;
-            height: 30px;
-            padding: 0;
-            margin: 0;
-        }
-        .dark-mode {
-            background-color: #1a202c;
-            color: #cbd5e0;
-        }
-        .dark-mode input, .dark-mode select {
-            background-color: #2d3748;
-            color: #cbd5e0;
-            border-color: #4a5568;
-        }
-        .dark-mode button {
-            background-color: #4299e1;
-        }
-        .dark-mode button:hover {
-            background-color: #3182ce;
-        }
-        .apercu-net {
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #2b6cb0;
-        }
+        body { font-family: Arial, sans-serif; margin: 40px; color: #333; background-color: #f9f9f9; transition: background-color 0.3s, color 0.3s; }
+        label { display: block; margin: 10px 0 5px; font-weight: bold; color: #2a4365; }
+        .required:after { content: " *"; color: #e53e3e; }
+        input, select { width: 80%; padding: 8px; margin-bottom: 10px; border: 1px solid #cbd5e0; border-radius: 4px; background-color: #fff; }
+        input:focus, select:focus { outline: none; border-color: #4299e1; box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.3); }
+        button { padding: 12px 15px; background: #2b6cb0; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px; display: block; width: 70%; transition: background-color 0.3s; }
+        button:hover { background: #2c5282; }
+        h2 { color: #2b6cb0; margin-top: 30px; border-bottom: 2px solid #bee3f8; padding-bottom: 5px; }
+        .color-picker { display: flex; align-items: center; margin: 15px 0; }
+        .color-picker label { margin-right: 10px; width: auto; }
+        .color-picker input { width: 50px; height: 30px; padding: 0; margin: 0; }
+        .dark-mode { background-color: #1a202c; color: #cbd5e0; }
+        .dark-mode input, .dark-mode select { background-color: #2d3748; color: #cbd5e0; border-color: #4a5568; }
+        .dark-mode button { background-color: #4299e1; }
+        .dark-mode button:hover { background-color: #3182ce; }
+        .apercu-net { margin-top: 20px; font-size: 18px; font-weight: bold; color: #2b6cb0; }
     </style>
 </head>
 <body>
@@ -110,6 +38,13 @@
         <input type="text" id="faxEntreprise" value="01 23 45 67 90">
         <label for="emailEntreprise" class="required">Email</label>
         <input type="email" id="emailEntreprise" value="contact@entreprise.com">
+        <label for="effectifEntreprise" class="required">Effectif (déduction HS + RGDU)</label>
+        <select id="effectifEntreprise">
+            <option value="moins20">Moins de 20 salariés (déduction 1,50 €/h, RGDU Tdelta 0,3781)</option>
+            <option value="20a49" selected>20 à 49 salariés (déduction 0,50 €/h, RGDU Tdelta 0,3781)</option>
+            <option value="50etplus">50 salariés et plus (déduction 0,50 €/h, RGDU Tdelta 0,3821)</option>
+        </select>
+
         <h2>Informations Salarié</h2>
         <label for="nomSalarie" class="required">Nom</label>
         <input type="text" id="nomSalarie" value="JEROME DUBOIS">
@@ -125,6 +60,13 @@
         <input type="text" id="dateEntree" value="01/01/2020">
         <label for="posteOccupe" class="required">Poste Occupé</label>
         <input type="text" id="posteOccupe" value="Employé">
+        <label for="conventionCollective">Convention collective applicable</label>
+        <input type="text" id="conventionCollective" value="SYNTEC">
+        <label for="positionClassification">Position dans la classification (niveau/coefficient)</label>
+        <input type="text" id="positionClassification" value="Niveau 1 - Coefficient 100">
+        <label for="cumulNetImposable">Cumul annuel net imposable (€)</label>
+        <input type="number" id="cumulNetImposable" value="0" min="0" step="0.01">
+
         <h2>Période et Salaire</h2>
         <label for="dateDebut" class="required">Date de début de période (JJ/MM/AAAA)</label>
         <input type="text" id="dateDebut" value="01/11/2026">
@@ -173,7 +115,8 @@
                 const requiredFields = [
                     "nomEntreprise","adresseEntreprise","siret","codeNaf","telEntreprise",
                     "emailEntreprise","nomSalarie","adresseSalarie","secuSalarie",
-                    "dateEntree","posteOccupe","dateDebut","dateFin","salaireBrut"
+                    "dateEntree","posteOccupe","dateDebut","dateFin","salaireBrut",
+                    "effectifEntreprise","conventionCollective","positionClassification"
                 ];
                 for (const field of requiredFields) {
                     const value = document.getElementById(field).value.trim();
@@ -205,6 +148,7 @@
                 const telEntreprise = document.getElementById("telEntreprise").value;
                 const faxEntreprise = document.getElementById("faxEntreprise").value;
                 const emailEntreprise = document.getElementById("emailEntreprise").value;
+                const effectif = document.getElementById("effectifEntreprise").value;
                 const nomSalarie = document.getElementById("nomSalarie").value;
                 const adresseSalarie = document.getElementById("adresseSalarie").value;
                 const emailSalarie = document.getElementById("emailSalarie").value;
@@ -212,6 +156,9 @@
                 const secuSalarie = document.getElementById("secuSalarie").value.replace(/\s/g, "");
                 const dateEntree = document.getElementById("dateEntree").value;
                 const posteOccupe = document.getElementById("posteOccupe").value;
+                const conventionCollective = document.getElementById("conventionCollective").value;
+                const positionClassification = document.getElementById("positionClassification").value;
+                const cumulNetImposable = parseFloat(document.getElementById("cumulNetImposable").value) || 0;
                 const dateDebut = document.getElementById("dateDebut").value;
                 const dateFin = document.getElementById("dateFin").value;
                 const salaireBrutMensuel = parseFloat(document.getElementById("salaireBrut").value);
@@ -236,108 +183,111 @@
                 const salaireBrutHSup = heuresSup * tauxHoraireMajoré;
                 const salaireBrutTotal = salaireBrutProrata + salaireBrutHSup;
 
-                const c = calculerCotisations(salaireBrutTotal);
+                const c = calculerCotisations(salaireBrutTotal, effectif);
                 const totalSalarial = c.totalSalarial;
-                const totalPatronal = c.totalPatronal;
+                const totalPatronalBrut = c.totalPatronal;
                 const netImposable = c.netImposable;
-                const impotRevenu = (netImposable * (tauxImpot / 100)) || 0;
+
+                const deductionForfaitaire = (effectif === "moins20") ? heuresSup * 1.50 : heuresSup * 0.50;
+                const totalPatronal = Math.max(0, totalPatronalBrut - c.rgdu - deductionForfaitaire);
+
+                const hsNetImposable = salaireBrutHSup * 0.81;
+                const plafondExoRestant = Math.max(0, 7500 - cumulNetImposable);
+                const hsExonere = Math.min(hsNetImposable, plafondExoRestant);
+                const netImposableApresExo = netImposable - hsExonere;
+                const impotRevenu = (netImposableApresExo * (tauxImpot / 100)) || 0;
                 const netAPayer = c.netSocial - impotRevenu;
 
                 const doc = new jsPDF();
                 const rgbColor = hexToRgb(couleurTheme);
 
-                const marginX = 8;
-                const marginY = 8;
+                const marginX = 8, marginY = 8;
                 const pageWidth = 210 - 2 * marginX;
                 const pageHeight = 297 - 2 * marginY;
                 doc.setDrawColor(rgbColor.r, rgbColor.g, rgbColor.b);
                 doc.setLineWidth(0.25);
                 doc.roundedRect(marginX, marginY, pageWidth, pageHeight, 4, 4);
 
-                // ===== TITRE REMONTÉ =====
                 doc.setFontSize(13);
                 doc.setTextColor(0, 0, 0);
                 doc.text("BULLETIN DE SALAIRE", 105, 14, { align: 'center' });
 
-                // ===== BLOC ENTREPRISE (remonté) =====
                 const infosEntreprise = [
-                    nomEntreprise,
-                    adresseEntrepriseVoie,
+                    nomEntreprise, adresseEntrepriseVoie,
                     ...(adresseEntrepriseCP ? [adresseEntrepriseCP] : []),
-                    `SIRET : ${siret}`,
-                    `Code NAF : ${codeNaf}`,
-                    `Tel : ${telEntreprise}`,
-                    `Fax : ${faxEntreprise}`,
-                    `Email : ${emailEntreprise}`
+                    `SIRET : ${siret}`, `Code NAF : ${codeNaf}`,
+                    `Tel : ${telEntreprise}`, `Fax : ${faxEntreprise}`, `Email : ${emailEntreprise}`
                 ];
-                const yEntrepriseStart = 17;
-                const yEntrepriseHeight = 34;
+                const yEntrepriseStart = 17, yEntrepriseHeight = 34;
                 doc.setFillColor(rgbColor.r, rgbColor.g, rgbColor.b);
                 doc.roundedRect(11, yEntrepriseStart, 88, yEntrepriseHeight, 3, 3, "F");
                 let yPositionEntreprise = yEntrepriseStart + 5.5;
                 infosEntreprise.forEach((line) => {
-                    doc.setFontSize(9);
-                    doc.setTextColor(0, 0, 0);
+                    doc.setFontSize(9); doc.setTextColor(0, 0, 0);
                     doc.text(line, 14, yPositionEntreprise, { align: 'left' });
                     yPositionEntreprise += 3.5;
                 });
 
-                // ===== BLOC SALARIÉ (remonté) =====
                 const infosSalarie = [
-                    nomSalarie,
-                    adresseSalarieVoie,
+                    nomSalarie, adresseSalarieVoie,
                     ...(adresseSalarieCP ? [adresseSalarieCP] : []),
                     `N° SECU : ${secuSalarie}`,
-                    `Entrée : ${dateEntree} (${anciennete.ans} ans ${anciennete.mois} mois)`,
-                    `Poste : ${posteOccupe}`,
-                    `Tel : ${telSalarie}`,
-                    `Email : ${emailSalarie}`
+                    `Entree : ${dateEntree} (${anciennete.ans} ans ${anciennete.mois} mois)`,
+                    `Poste : ${posteOccupe}`, `Tel : ${telSalarie}`, `Email : ${emailSalarie}`
                 ];
-                const ySalarieStart = 17;
-                const ySalarieHeight = 34;
+                const ySalarieStart = 17, ySalarieHeight = 34;
                 doc.setFillColor(rgbColor.r, rgbColor.g, rgbColor.b);
                 doc.roundedRect(111, ySalarieStart, 88, ySalarieHeight, 3, 3, "F");
                 let yPositionSalarie = ySalarieStart + 5.5;
                 infosSalarie.forEach((line) => {
-                    doc.setFontSize(9);
-                    doc.setTextColor(0, 0, 0);
+                    doc.setFontSize(9); doc.setTextColor(0, 0, 0);
                     doc.text(line, 114, yPositionSalarie, { align: 'left' });
                     yPositionSalarie += 3.5;
                 });
 
-                // ===== PÉRIODE (remontée) =====
+                doc.setFontSize(8);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Convention collective : ${conventionCollective}`, 14, 17 + 34 + 4);
+                doc.text(`Position : ${positionClassification}`, 14, 17 + 34 + 8);
+
+                // ===== PERIODE DÉCALÉE DE 1 CM (10 mm) =====
+                // Base : 17 + 34 + 12 = 63 mm → 73 mm
                 doc.setFont(undefined, 'bold');
                 doc.setFontSize(10);
                 doc.setTextColor(rgbColor.r, rgbColor.g, rgbColor.b);
-                doc.text("PERIODE :", 105, yEntrepriseStart + yEntrepriseHeight + 5, { align: 'center' });
+                doc.text("PERIODE :", 105, 73, { align: 'center' });
                 doc.setFontSize(9);
                 doc.setTextColor(0, 0, 0);
-                doc.text(`${dateDebut} au ${dateFin}`, 105, yEntrepriseStart + yEntrepriseHeight + 10, { align: 'center' });
+                doc.text(`${dateDebut} au ${dateFin}`, 105, 78, { align: 'center' });
                 doc.setFont(undefined, 'normal');
 
-                // ===== TABLEAU (démarre plus haut) =====
                 const lignesPaie = [
                     ["SALAIRE BRUT MENSUEL", "", "", salaireBrutMensuel.toFixed(2), "", ""],
                     ["SALAIRE BRUT PRORATA", "", "", salaireBrutProrata.toFixed(2), "", ""],
-                    ["HEURES SUPPLÉMENTAIRES", heuresSup.toFixed(2), `${majorationHS}%`, "", salaireBrutHSup.toFixed(2), ""],
+                    ["HEURES SUPPLEMENTAIRES", heuresSup.toFixed(2), `${majorationHS}%`, "", salaireBrutHSup.toFixed(2), ""],
                     ["Taux horaire", tauxHoraire.toFixed(2), "", "", "", ""],
-                    ["Heures travaillées", heuresMensuelles.toFixed(2), "", "", "", ""],
+                    ["Heures travaillees", heuresMensuelles.toFixed(2), "", "", "", ""],
                     ["COTISATIONS SALARIALES", "", "", "", "", ""],
                     ...ligneSal(c.sal),
-                    ["Impôt sur le revenu prélevé à la source", "", tauxImpot.toFixed(1) + "%", impotRevenu.toFixed(2), "", ""],
-                    ["CONGÉS PAYÉS (10%)", "", "10%", (salaireBrutTotal * 0.1).toFixed(2), "", ""],
+                    ["Impot sur le revenu preleve a la source", "", tauxImpot.toFixed(1) + "%", impotRevenu.toFixed(2), "", ""],
+                    ["CONGES PAYES (10%)", "", "10%", (salaireBrutTotal * 0.1).toFixed(2), "", ""],
                     ["", "", "TOTAL SALARIAL", totalSalarial.toFixed(2), "", ""],
                     ["COTISATIONS PATRONALES", "", "", "", "", ""],
                     ...lignePat(c.pat),
+                    ...(c.rgdu > 0 ? [["Reduction generale degressive unique (RGDU)", "", "", "", "", "-" + c.rgdu.toFixed(2)]] : []),
+                    ...(deductionForfaitaire > 0 ? [["Deduction forfaitaire HS", "", "", "", "", "-" + deductionForfaitaire.toFixed(2)]] : []),
                     ["", "", "TOTAL PATRONAL", "", "", totalPatronal.toFixed(2)],
                     ["NET IMPOSABLE", "", "", netImposable.toFixed(2), "", ""],
-                    ["NET À PAYER EN EUROS", "", "", netAPayer.toFixed(2), "", ""]
+                    ...(hsExonere > 0 ? [["dont HS exonerees d'IR", "", "", "-" + hsExonere.toFixed(2), "", ""]] : []),
+                    ["NET A PAYER EN EUROS", "", "", netAPayer.toFixed(2), "", ""]
                 ];
 
                 const columnWidths = [58, 15, 15, 24, 24, 29];
                 const totalTableWidth = columnWidths.reduce((a, b) => a + b, 0);
                 const startX = (210 - totalTableWidth) / 2;
-                const tableStartY = yEntrepriseStart + yEntrepriseHeight + 13;
+                
+                // Tableau commence après la période (y=85 mm)
+                const tableStartY = 85;
 
                 doc.setDrawColor(rgbColor.r, rgbColor.g, rgbColor.b);
                 doc.setFillColor(rgbColor.r, rgbColor.g, rgbColor.b);
@@ -345,14 +295,14 @@
 
                 doc.autoTable({
                     startY: tableStartY + 6,
-                    head: [["ÉLÉMENTS DE PAIE", "BASE", "TAUX", "À DÉDUIRE", "À PAYER", "CHARGES PATRONALES"]],
+                    head: [["ELEMENTS DE PAIE", "BASE", "TAUX", "A DEDUIRE", "A PAYER", "CHARGES PATRONALES"]],
                     body: lignesPaie,
-                    margin: { left: startX, right: startX, bottom: 10 },
+                    margin: { left: startX, right: startX, bottom: 15 }, // Marge de sécurité
                     styles: {
                         fontSize: 7,
-                        cellPadding: 1.6,
+                        cellPadding: 1.0,
                         overflow: 'linebreak',
-                        minCellHeight: 4.6,
+                        minCellHeight: 4.2,
                         halign: 'left',
                         textColor: [0, 0, 0]
                     },
@@ -360,7 +310,7 @@
                         fillColor: [rgbColor.r, rgbColor.g, rgbColor.b],
                         textColor: [0, 0, 0],
                         fontSize: 7,
-                        cellPadding: 2.2,
+                        cellPadding: 1.8,
                         halign: 'center'
                     },
                     columnStyles: {
@@ -373,11 +323,17 @@
                     },
                     bodyStyles: { valign: 'middle' },
                     alternateRowStyles: { fillColor: [rgbColor.r, rgbColor.g, rgbColor.b] },
-                    tableWidth: 'fixed'
+                    tableWidth: 'fixed',
+                    pageBreak: 'avoid' // Empêche la coupure
                 });
 
+                // Mentions légales forcées en bas de page 1
+                doc.setFontSize(7);
+                doc.setTextColor(100, 100, 100);
+                doc.text("Mentions legales : www.service-public.fr/particuliers/vosdroits/F559", 105, 285, { align: 'center' });
+
                 doc.save(`bulletin_paie_${nomSalarie.replace(/\s+/g, '_')}.pdf`);
-                alert("Fiche de paie générée avec succès !");
+                alert("Fiche de paie generee avec succes !");
             };
 
             function hexToRgb(hex) {
@@ -423,63 +379,43 @@
     </script>
 
 <script>
-// ===== PARAMÈTRES 2026 (vérifiés) =====
+// ===== PARAMÈTRES 2026 =====
 const PMSS = 4005;
+const SMIC_MENSUEL_2026 = 1823.03;
 
 const TAUX = {
     salarie: {
-        vieillessePlafonnee: 0.069,
-        vieillesseDeplafonnee: 0.004,
-        agircT1: 0.0315,
-        cegT1: 0.0086,
-        agircT2: 0.0864,
-        cegT2: 0.0108,
-        cet: 0.0014,
-        csgDeductible: 0.068,
-        csgNonDeductible: 0.024,
-        crds: 0.005
+        vieillessePlafonnee: 0.069, vieillesseDeplafonnee: 0.004,
+        agircT1: 0.0315, cegT1: 0.0086, agircT2: 0.0864, cegT2: 0.0108, cet: 0.0014,
+        csgDeductible: 0.068, csgNonDeductible: 0.024, crds: 0.005
     },
     patronal: {
-        maladie: 0.13,
-        famille: 0.0525,
-        vieillessePlafonnee: 0.0855,
-        vieillesseDeplafonnee: 0.0211,
-        agircT1: 0.0472,
-        cegT1: 0.0129,
-        agircT2: 0.1295,
-        cegT2: 0.0162,
-        cet: 0.0021,
-        chomage: 0.04,
-        ags: 0.0025,
-        fnal: 0.001,
-        formation: 0.01,
-        apprentissage: 0.0068,
-        mobilite: 0.01
+        maladie: 0.13, famille: 0.0525, vieillessePlafonnee: 0.0855, vieillesseDeplafonnee: 0.0211,
+        agircT1: 0.0472, cegT1: 0.0129, agircT2: 0.1295, cegT2: 0.0162, cet: 0.0021,
+        chomage: 0.04, ags: 0.0025, fnal: 0.001,
+        formation: 0.01, apprentissage: 0.0068, mobilite: 0.01
     }
 };
 
 const IR = {
-    abattementMin: 509,
-    abattementMax: 14555,
-    plafondDemiPart: 1807,
+    abattementMin: 509, abattementMax: 14555, plafondDemiPart: 1807,
     decote: { seul: { base: 897, seuil: 1982 }, couple: { base: 1483, seuil: 3277 }, taux: 0.4525 }
 };
 
 const DEFAULT_TRANCHES = [
-    { min: 0,      max: 11600,  taux: 0 },
-    { min: 11600,  max: 29579,  taux: 11 },
-    { min: 29579,  max: 84577,  taux: 30 },
-    { min: 84577,  max: 181917, taux: 41 },
-    { min: 181917, max: null,   taux: 45 }
+    { min: 0, max: 11600, taux: 0 },
+    { min: 11600, max: 29579, taux: 11 },
+    { min: 29579, max: 84577, taux: 30 },
+    { min: 84577, max: 181917, taux: 41 },
+    { min: 181917, max: null, taux: 45 }
 ];
 let TRANCHES_IMPOT = DEFAULT_TRANCHES;
 
-// ===== COTISATIONS =====
 function ligne(label, base, taux, deductible = true) {
     return { label, base, taux, montant: base * taux, deductible };
 }
 
-function calculerCotisations(B) {
+function calculerCotisations(B, effectif) {
     const tA = Math.min(B, PMSS);
     const t2 = Math.min(Math.max(B - PMSS, 0), 7 * PMSS);
     const p4 = Math.min(B, 4 * PMSS);
@@ -488,33 +424,33 @@ function calculerCotisations(B) {
     const s = TAUX.salarie, p = TAUX.patronal;
 
     const sal = [
-        ligne('Assurance vieillesse plafonnée', tA, s.vieillessePlafonnee, true),
-        ligne('Assurance vieillesse déplafonnée', B, s.vieillesseDeplafonnee, true),
-        ligne('Retraite complémentaire tranche 1', tA, s.agircT1, true),
+        ligne('Assurance vieillesse plafonnee', tA, s.vieillessePlafonnee, true),
+        ligne('Assurance vieillesse deplafonnee', B, s.vieillesseDeplafonnee, true),
+        ligne('Retraite complementaire tranche 1', tA, s.agircT1, true),
         ligne('CEG tranche 1', tA, s.cegT1, true),
-        ligne('Retraite complémentaire tranche 2', t2, s.agircT2, true),
+        ligne('Retraite complementaire tranche 2', t2, s.agircT2, true),
         ligne('CEG tranche 2', t2, s.cegT2, true),
         ligne('CET', hp, s.cet, true),
-        ligne('CSG déductible', csg, s.csgDeductible, true),
-        ligne('CSG non déductible', csg, s.csgNonDeductible, false),
+        ligne('CSG deductible', csg, s.csgDeductible, true),
+        ligne('CSG non deductible', csg, s.csgNonDeductible, false),
         ligne('CRDS', csg, s.crds, false)
     ];
     const pat = [
-        ligne('Maladie - maternité - invalidité - décès', B, p.maladie),
+        ligne('Maladie - maternite - invalidite - deces', B, p.maladie),
         ligne('Allocations familiales', B, p.famille),
-        ligne('Assurance vieillesse plafonnée', tA, p.vieillessePlafonnee),
-        ligne('Assurance vieillesse déplafonnée', B, p.vieillesseDeplafonnee),
-        ligne('Retraite complémentaire tranche 1', tA, p.agircT1),
+        ligne('Assurance vieillesse plafonnee', tA, p.vieillessePlafonnee),
+        ligne('Assurance vieillesse deplafonnee', B, p.vieillesseDeplafonnee),
+        ligne('Retraite complementaire tranche 1', tA, p.agircT1),
         ligne('CEG tranche 1', tA, p.cegT1),
-        ligne('Retraite complémentaire tranche 2', t2, p.agircT2),
+        ligne('Retraite complementaire tranche 2', t2, p.agircT2),
         ligne('CEG tranche 2', t2, p.cegT2),
         ligne('CET', hp, p.cet),
-        ligne('Chômage', p4, p.chomage),
+        ligne('Chomage', p4, p.chomage),
         ligne('Cotisation AGS', p4, p.ags),
         ligne('FNAL', tA, p.fnal),
         ligne('Formation professionnelle', B, p.formation),
         ligne("Taxe d'apprentissage", B, p.apprentissage),
-        ligne('Versement mobilité', B, p.mobilite)
+        ligne('Versement mobilite', B, p.mobilite)
     ];
     const somme = L => L.reduce((t, l) => t + l.montant, 0);
     const totalSalarial = somme(sal);
@@ -522,14 +458,35 @@ function calculerCotisations(B) {
     const netSocial = B - totalSalarial;
     const totalSalarialDeductible = sal.filter(l => l.deductible).reduce((t, l) => t + l.montant, 0);
     const netImposable = B - totalSalarialDeductible;
-    return { sal, pat, totalSalarial, totalPatronal, netSocial, netImposable };
+
+    let rgdu = 0;
+    const SMIC_ANNUEL = SMIC_MENSUEL_2026 * 12;
+    const troisSMIC = SMIC_ANNUEL * 3;
+    const remunerationAnnuelle = B * 12;
+
+    if (remunerationAnnuelle < troisSMIC) {
+        const Tmin = 0.0200;
+        let Tdelta, coeffMax;
+        if (effectif === "50etplus") {
+            Tdelta = 0.3821;
+            coeffMax = 0.4021;
+        } else {
+            Tdelta = 0.3781;
+            coeffMax = 0.3981;
+        }
+        const P = 1.75;
+        const rapport = (3 * SMIC_ANNUEL) / remunerationAnnuelle - 1;
+        const coeff = Tmin + (Tdelta * Math.pow((1/2) * Math.max(0, rapport), P));
+        rgdu = Math.min(coeff, coeffMax) * B;
+    }
+
+    return { sal, pat, totalSalarial, totalPatronal, netSocial, netImposable, rgdu };
 }
 
 const pct = t => parseFloat((t * 100).toFixed(2)) + '%';
 const ligneSal = L => L.filter(l => l.montant > 0.005).map(l => [l.label, l.base.toFixed(2), pct(l.taux), l.montant.toFixed(2), '', '']);
 const lignePat = L => L.filter(l => l.montant > 0.005).map(l => [l.label, l.base.toFixed(2), pct(l.taux), '', '', l.montant.toFixed(2)]);
 
-// ===== IMPÔT SUR LE REVENU =====
 function nbPartsFiscales(couple, enfants) {
     return (couple ? 2 : 1) + Math.min(enfants, 2) * 0.5 + Math.max(enfants - 2, 0);
 }
@@ -565,7 +522,8 @@ function getNbParts() {
 
 function calculerTauxImpot() {
     const brut = parseFloat(document.getElementById('salaireBrut').value) || 0;
-    const c = calculerCotisations(brut);
+    const effectif = document.getElementById('effectifEntreprise').value;
+    const c = calculerCotisations(brut, effectif);
     const netImposableAnnuel = c.netImposable * 12;
     const couple = parseInt(document.getElementById('statutMarital').value) === 2;
     const nbParts = getNbParts();
@@ -573,11 +531,11 @@ function calculerTauxImpot() {
     const taux = netImposableAnnuel > 0 ? (r.impotNet / netImposableAnnuel) * 100 : 0;
 
     document.getElementById('tauxImpot').value = taux.toFixed(2);
-    document.getElementById('helpImpot').innerHTML = `Barème 2026 — net imposable annuel ${netImposableAnnuel.toFixed(2)} € (${nbParts} part${nbParts > 1 ? 's' : ''}) — impôt brut ${r.impotBrut.toFixed(2)} €, décote ${r.decote.toFixed(2)} €, impôt estimé ${r.impotNet.toFixed(2)} €`;
+    document.getElementById('helpImpot').innerHTML = `Bareme 2026 — net imposable annuel ${netImposableAnnuel.toFixed(2)} € (${nbParts} part${nbParts > 1 ? 's' : ''}) — impot brut ${r.impotBrut.toFixed(2)} €, decote ${r.decote.toFixed(2)} €, impot estime ${r.impotNet.toFixed(2)} € — RGDU estimee : ${c.rgdu.toFixed(2)} €/mois`;
 
     const impotMensuel = (c.netImposable * taux) / 100;
     const netAPayer = c.netSocial - impotMensuel;
-    document.getElementById('apercuNetAPayer').textContent = `Net à payer : ${netAPayer.toFixed(2)} €`;
+    document.getElementById('apercuNetAPayer').textContent = `Net a payer : ${netAPayer.toFixed(2)} €`;
 }
 
 fetch('tranches_impot_2026.json')
@@ -588,6 +546,7 @@ calculerTauxImpot();
 
 document.getElementById('statutMarital').addEventListener('change', calculerTauxImpot);
 document.getElementById('nbEnfants').addEventListener('change', calculerTauxImpot);
+document.getElementById('effectifEntreprise').addEventListener('change', calculerTauxImpot);
 </script>
 
 </body></html>
